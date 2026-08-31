@@ -203,3 +203,44 @@ python tools/verify_webp_offsets.py
 those are wrong it does not crash — it silently mislabels the whole library. This
 generates real WebP files in every container form and checks the parse against
 Pillow. Requires Pillow.
+
+---
+
+## Privacy
+
+The app collects nothing. It declares no `INTERNET` permission, so the OS itself
+prevents it from transmitting anything — the claim is enforced by Android, not by
+our good intentions. Full policy: [docs/privacy.html](docs/privacy.html), published at
+<https://mintnchocochip.github.io/stickervault/privacy.html>.
+
+Before submitting to Play, replace the contact-email placeholder in that file.
+
+## License
+
+GNU General Public License v3.0 — see [LICENSE](LICENSE).
+
+In short: use it, study it, change it, share it. If you distribute a modified
+version, that version must also be open source under the GPL. This is deliberate:
+it stops a consumer utility like this being repackaged with ads and trackers and
+shipped as someone else's closed-source app.
+
+    StickerVault — back up and restore WhatsApp stickers
+    Copyright (C) 2026 mintnchocochip
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+## Not affiliated with WhatsApp
+
+This is an independent project, not affiliated with, endorsed by, or connected to
+WhatsApp LLC or Meta Platforms, Inc.
