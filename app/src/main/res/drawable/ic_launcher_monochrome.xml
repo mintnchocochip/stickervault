@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Single flat shape: the system recolours this whole layer, so internal
+         contrast has to come from negative space rather than from fill colours. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M28,34h52a5,5 0 0 1 5,5v36a5,5 0 0 1 -5,5h-52a5,5 0 0 1 -5,-5v-36a5,5 0 0 1 5,-5zM54,46a10,10 0 1 0 0,20a10,10 0 1 0 0,-20z" />
+</vector>

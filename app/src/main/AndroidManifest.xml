@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      No storage permission is declared, deliberately.
+        - Folder access comes from ACTION_OPEN_DOCUMENT_TREE (a user grant, not a
+          permission), which works for the WhatsApp sticker folder on real devices.
+        - Writing the zip uses MediaStore Downloads, which needs no permission for
+          files this app creates.
+
+      MANAGE_EXTERNAL_STORAGE was tried and reverted: it is not required, and it
+      is the most alarming prompt Android shows.
+
+      There is also no INTERNET permission. Coil pulls in OkHttp, but without the
+      permission the OS blocks any network call outright, so the app physically
+      cannot send the collection anywhere.
+    -->
+
+    <!-- Archiving thousands of files takes minutes; it must survive the user
+         leaving the app, which requires a foreground service. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+      Package visibility. Since Android 11 other apps are hidden by default, and
+      without these entries both the add-pack intent and the whitelist query fail
+      exactly as though WhatsApp were not installed - with no error saying so.
+    -->
+    <queries>
+        <package android:name="com.whatsapp" />
+        <package android:name="com.whatsapp.w4b" />
+    </queries>
+
+    <application
+        android:name=".VaultApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.StickerVault">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.StickerVault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".vault.ExportService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!--
+          Must be exported so WhatsApp can reach it, and guarded by WhatsApp's
+          own read permission so nothing else can. The authority is derived from
+          applicationId so build flavors would each get a distinct one.
+        -->
+        <provider
+            android:name=".provider.StickerContentProvider"
+            android:authorities="${applicationId}.stickercontentprovider"
+            android:enabled="true"
+            android:exported="true"
+            android:readPermission="com.whatsapp.sticker.READ" />
+
+    </application>
+
+</manifest>
