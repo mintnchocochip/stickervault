@@ -53,8 +53,19 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            if (hasReleaseKeystore) {
-                signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (hasReleaseKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                // Falls back to the debug key so the release build is still
+                // installable for sideloading and GitHub releases. This is NOT
+                // publishable: the debug key is a public, well-known constant,
+                // so it proves nothing about who built the APK, and Play will
+                // reject it. Create keystore.properties before publishing.
+                logger.lifecycle(
+                    "StickerVault: no keystore.properties - signing release with " +
+                        "the debug key. Sideload only.",
+                )
+                signingConfigs.getByName("debug")
             }
         }
         debug {

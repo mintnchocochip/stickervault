@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StickerVault — your stickers outlive your phone</title>
+<meta name="description" content="Back up your WhatsApp sticker collection to a portable zip and restore it on a new phone. Open source, Android, 2.2 MB, no network permission.">
+<meta property="og:title" content="StickerVault">
+<meta property="og:description" content="Your WhatsApp stickers outlive your phone.">
+<meta name="theme-color" content="#F0EEE6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F0EEE6;
+  --paper-2:#E8E5DA;
+  --ink:#1F1E1D;
+  --ink-soft:#5C5850;
+  --ink-faint:#8A8479;
+  --clay:#C15F3C;
+  --clay-bright:#D97757;
+  --line:rgba(31,30,29,.14);
+  --card:#FAF9F5;
+  --shadow:0 1px 2px rgba(31,30,29,.04),0 8px 24px rgba(31,30,29,.06);
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#191817;--paper-2:#211F1E;--ink:#F2EFE8;--ink-soft:#B5AEA3;
+    --ink-faint:#7E786E;--clay:#E08765;--clay-bright:#E99878;
+    --line:rgba(242,239,232,.16);--card:#232120;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 28px rgba(0,0,0,.28);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:17px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:-.01em;line-height:1.04;margin:0}
+em{font-style:italic;color:var(--clay)}
+a{color:inherit}
+
+/* ---------- nav ---------- */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid transparent;transition:border-color .4s var(--ease),background .4s var(--ease);
+}
+nav.solid{border-bottom-color:var(--line);background:color-mix(in srgb,var(--paper) 82%,transparent)}
+.navin{max-width:1080px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:14px}
+.mark{display:flex;align-items:center;gap:9px;font-weight:600;font-size:15px;letter-spacing:-.01em}
+.glyph{width:22px;height:22px;border-radius:6px;background:var(--clay);position:relative;flex:none}
+.glyph::after{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--paper)}
+.navsp{flex:1}
+.navlink{font-size:14px;color:var(--ink-soft);text-decoration:none;transition:color .2s}
+.navlink:hover{color:var(--ink)}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:9px;padding:13px 22px;border-radius:10px;
+  font-size:15px;font-weight:500;text-decoration:none;border:1px solid transparent;
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .2s,border-color .2s;
+  will-change:transform;
+}
+.btn-primary{background:var(--clay);color:#fff;box-shadow:0 1px 2px rgba(193,95,60,.2),0 6px 18px rgba(193,95,60,.22)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(193,95,60,.24),0 12px 28px rgba(193,95,60,.3)}
+.btn-ghost{border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{transform:translateY(-2px);border-color:var(--ink-faint)}
+
+/* ---------- hero ---------- */
+header{padding:150px 0 84px;position:relative}
+.eyebrow{
+  font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+  font-weight:500;margin-bottom:26px;
+}
+h1{font-size:clamp(50px,9vw,104px)}
+.lede{
+  font-size:clamp(17px,2.1vw,21px);color:var(--ink-soft);max-width:34em;
+  margin:28px 0 38px;line-height:1.55;
+}
+.cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.note{font-size:13.5px;color:var(--ink-faint);margin-top:18px}
+
+/* floating chips */
+.chips{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:-1}
+.chip{
+  position:absolute;border-radius:16px;background:var(--card);border:1px solid var(--line);
+  box-shadow:var(--shadow);opacity:0;
+}
+.chip i{position:absolute;inset:22%;border-radius:50%;background:var(--clay);opacity:.16}
+.chip:nth-child(2) i{border-radius:20%;transform:rotate(12deg)}
+.chip:nth-child(4) i{border-radius:50% 50% 50% 8%}
+
+/* ---------- rule + stats ---------- */
+.rule{height:1px;background:var(--line);transform-origin:left;transform:scaleX(0)}
+.rule.in{transform:scaleX(1);transition:transform 1.1s var(--ease)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;padding:52px 0}
+.stat .n{font-family:var(--serif);font-size:clamp(34px,5vw,54px);line-height:1;letter-spacing:-.02em}
+.stat .l{font-size:13px;color:var(--ink-faint);margin-top:10px;line-height:1.4}
+@media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr);gap:30px}}
+
+/* ---------- sections ---------- */
+section{padding:96px 0}
+.tag{
+  font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--clay);
+  font-weight:600;margin-bottom:20px;
+}
+h2{font-size:clamp(34px,5.2vw,60px);max-width:16em}
+.sub{color:var(--ink-soft);max-width:36em;margin-top:22px;font-size:17px}
+
+/* problem pull-quote */
+.quote{
+  font-family:var(--serif);font-size:clamp(26px,4vw,44px);line-height:1.24;
+  max-width:19em;margin:0;
+}
+.quote span{color:var(--ink-faint)}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.step{background:var(--paper);padding:34px 28px 38px}
+.step .num{font-family:var(--serif);font-size:15px;color:var(--clay);letter-spacing:.04em}
+.step h3{font-size:23px;margin:14px 0 10px}
+.step p{color:var(--ink-soft);font-size:15px;margin:0;line-height:1.6}
+@media(max-width:820px){.steps{grid-template-columns:1fr}}
+
+/* feature grid */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:52px}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;
+  transition:transform .4s var(--ease),box-shadow .4s var(--ease);will-change:transform;
+}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.card h3{font-size:21px;margin-bottom:10px}
+.card p{color:var(--ink-soft);font-size:15px;margin:0}
+.card code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--paper-2);padding:1px 6px;border-radius:5px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+
+/* limits */
+.limits{border-left:2px solid var(--clay);padding-left:26px;margin-top:44px;display:grid;gap:26px;max-width:44em}
+.limit h3{font-family:var(--sans);font-size:16px;font-weight:600;margin-bottom:6px}
+.limit p{color:var(--ink-soft);font-size:15px;margin:0}
+
+/* cta band */
+.band{background:var(--ink);color:var(--paper);border-radius:22px;padding:72px 52px;text-align:center;margin:40px 0 0}
+.band h2{color:var(--paper);margin:0 auto;max-width:13em;font-size:clamp(32px,4.6vw,52px)}
+.band p{color:rgba(242,239,232,.66);max-width:30em;margin:22px auto 34px}
+.band .btn-primary{background:var(--clay-bright)}
+.band .btn-ghost{border-color:rgba(242,239,232,.28);color:var(--paper)}
+@media(max-width:640px){.band{padding:52px 26px}}
+
+footer{padding:56px 0 72px;color:var(--ink-faint);font-size:14px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+footer a{color:var(--ink-soft);text-decoration:none}
+footer a:hover{color:var(--clay)}
+
+/* ---------- reveal ---------- */
+.rv{opacity:0;transform:translateY(22px)}
+.rv.in{opacity:1;transform:none;transition:opacity .8s var(--ease),transform .8s var(--ease)}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rv,.rv.in{opacity:1!important;transform:none!important;transition:none!important}
+  .rule{transform:scaleX(1)!important;transition:none!important}
+  .chip{display:none}
+  .btn:hover,.card:hover{transform:none!important}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="navin">
+    <span class="mark"><span class="glyph"></span>StickerVault</span>
+    <span class="navsp"></span>
+    <a class="navlink" href="#how">How it works</a>
+    <a class="navlink" href="#build">Under the hood</a>
+    <a class="navlink" href="https://github.com/mintnchocochip/stickervault">GitHub</a>
+  </div>
+</nav>
+
+<header>
+  <div class="chips" id="chips" aria-hidden="true">
+    <div class="chip"><i></i></div><div class="chip"><i></i></div>
+    <div class="chip"><i></i></div><div class="chip"><i></i></div>
+    <div class="chip"><i></i></div>
+  </div>
+  <div class="wrap">
+    <div class="eyebrow rv">Android · Open source</div>
+    <h1><span class="rv">Your stickers</span><br><span class="rv"><em>outlive</em> your phone.</span></h1>
+    <p class="lede rv">
+      WhatsApp has no sticker export, and its backup does not reliably carry them
+      across devices. Change phones and four years of collecting is simply gone.
+      StickerVault takes the collection out of WhatsApp and puts it somewhere that lasts.
+    </p>
+    <div class="cta rv">
+      <a class="btn btn-primary" href="https://github.com/mintnchocochip/stickervault/releases/latest">
+        Download APK
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0 5-5m-5 5-5-5M4 21h16"/></svg>
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/mintnchocochip/stickervault">View source</a>
+    </div>
+    <p class="note rv">2.2 MB · No network permission · Verified on a real 11,203-sticker library</p>
+  </div>
+</header>
+
+<div class="wrap"><div class="rule rv-rule"></div></div>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat rv"><div class="n" data-count="11203">0</div><div class="l">stickers archived in one run</div></div>
+    <div class="stat rv"><div class="n" data-count="433">0</div><div class="l">original packs recovered</div></div>
+    <div class="stat rv"><div class="n" data-count="300" data-suffix="/300">0</div><div class="l">files verified intact, sampled</div></div>
+    <div class="stat rv"><div class="n" data-count="22" data-decimal="1" data-suffix=" MB">0</div><div class="l">installed app size</div></div>
+  </div>
+</div>
+
+<div class="wrap"><div class="rule rv-rule"></div></div>
+
+<section>
+  <div class="wrap">
+    <div class="tag rv">The problem</div>
+    <p class="quote rv">Four years. Four phones. <span>Four collections rebuilt from nothing, because the only copy lived inside an app that dies with the handset.</span></p>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="tag rv">How it works</div>
+    <h2 class="rv">Take the collection out. Put back what you want.</h2>
+    <div class="steps rv">
+      <div class="step">
+        <div class="num">01</div>
+        <h3>Archive</h3>
+        <p>Grant the sticker folder once. Everything is de-duplicated by content hash and streamed into a single zip in Downloads — as a foreground service, so it survives leaving the app.</p>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <h3>Keep</h3>
+        <p>The zip holds plain WebP files that open on any computer. No proprietary container, no database, nothing that needs this app to read it. Put it on Drive and forget it.</p>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <h3>Restore</h3>
+        <p>On the new phone, point the app at the zip. Stickers are verified, regrouped into their original packs, and handed to WhatsApp.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="build">
+  <div class="wrap">
+    <div class="tag rv">Under the hood</div>
+    <h2 class="rv">The interesting parts.</h2>
+    <div class="grid">
+      <div class="card rv">
+        <h3>Pack names survive without root</h3>
+        <p>Every WhatsApp sticker carries an EXIF chunk naming the pack it came from. 94.9% of a real library had it — enough to rebuild 433 packs, plus 783 self-made stickers, with the database WhatsApp keeps locked away never touched.</p>
+      </div>
+      <div class="card rv">
+        <h3>The filename is the checksum</h3>
+        <p>Files are stored under their own SHA-256. A sticker whose bytes do not hash to its own name is corrupt or tampered with, and is refused on import. Integrity comes free from the layout, with no checksum file to keep in sync.</p>
+      </div>
+      <div class="card rv">
+        <h3>It physically cannot phone home</h3>
+        <p>No <code>INTERNET</code> permission is declared, so the OS blocks any network call regardless of what the code does. No storage permission either — folder access is a user grant, not a capability.</p>
+      </div>
+      <div class="card rv">
+        <h3>Archives are treated as hostile</h3>
+        <p>A strict entry-name allowlist, control-character rejection, zip-bomb ceilings, and a real-WebP check before anything is written. Declared sizes are never trusted. Thirty-four traversal and encoding payloads are tested against the rule.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tag rv">Honestly</div>
+    <h2 class="rv">What it can't do.</h2>
+    <div class="limits">
+      <div class="limit rv">
+        <h3>Uninstalling removes the packs</h3>
+        <p>WhatsApp serves third-party packs live from the providing app rather than copying them in. That is true of every sticker app on Android, and has been an open request since 2018. The zip is the durable artifact; the app is a replaceable adapter.</p>
+      </div>
+      <div class="limit rv">
+        <h3>WhatsApp caps packs per app</h3>
+        <p>The documented limit is ten packs, around 300 stickers. Whether it is actually enforced at runtime is still unverified — the app asks WhatsApp directly and shows you which packs it kept.</p>
+      </div>
+      <div class="limit rv">
+        <h3>Large animated stickers are archive-only</h3>
+        <p>Android ships no animated-WebP encoder, so an animated sticker over WhatsApp's 500 KB limit can be stored safely but never shrunk to fit. Those are reported, not silently dropped.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="band rv">
+    <h2>Stop rebuilding the collection.</h2>
+    <p>Free and open source. Sideload it, read every line, or build it yourself in one command.</p>
+    <div class="cta" style="justify-content:center">
+      <a class="btn btn-primary" href="https://github.com/mintnchocochip/stickervault/releases/latest">Download for Android</a>
+      <a class="btn btn-ghost" href="https://github.com/mintnchocochip/stickervault">Read the source</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <footer>
+    <span class="mark" style="font-size:14px"><span class="glyph" style="width:18px;height:18px"></span>StickerVault</span>
+    <span class="navsp"></span>
+    <a href="https://github.com/mintnchocochip/stickervault">GitHub</a>
+    <a href="https://github.com/mintnchocochip/stickervault/releases/latest">Releases</a>
+    <span>Not affiliated with WhatsApp or Meta.</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- nav background on scroll ---- */
+  var nav = document.getElementById("nav");
+  var onScroll = function(){
+    if (window.scrollY > 12) nav.classList.add("solid");
+    else nav.classList.remove("solid");
+  };
+  window.addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
+
+  /* ---- hero: stagger the reveal so lines arrive in sequence ---- */
+  var heroItems = document.querySelectorAll("header .rv");
+  heroItems.forEach(function(el, i){
+    if (reduce) { el.classList.add("in"); return; }
+    el.style.transitionDelay = (90 * i) + "ms";
+    requestAnimationFrame(function(){
+      setTimeout(function(){ el.classList.add("in"); }, 60);
+    });
+  });
+
+  /* ---- floating chips, laid out once and drifted with CSS transforms ---- */
+  var chipBox = document.getElementById("chips");
+  if (chipBox && !reduce) {
+    var spots = [
+      {x:80, y:14, s:104, r:-8,  d:0},
+      {x:89, y:44, s:74,  r:11,  d:.6},
+      {x:71, y:72, s:88,  r:-14, d:1.2},
+      {x:93, y:74, s:56,  r:6,   d:1.8},
+      {x:63, y:26, s:60,  r:16,  d:2.4}
+    ];
+    var chips = chipBox.querySelectorAll(".chip");
+    chips.forEach(function(c, i){
+      var s = spots[i];
+      if (!s) return;
+      c.style.left = s.x + "%";
+      c.style.top = s.y + "%";
+      c.style.width = s.s + "px";
+      c.style.height = s.s + "px";
+      c.style.transform = "rotate(" + s.r + "deg) translateY(18px) scale(.94)";
+      c.style.transition = "opacity 1s var(--ease) " + (300 + i*110) + "ms, transform 1.1s var(--ease) " + (300 + i*110) + "ms";
+      requestAnimationFrame(function(){
+        c.style.opacity = "1";
+        c.style.transform = "rotate(" + s.r + "deg) translateY(0) scale(1)";
+      });
+      c.dataset.rot = s.r;
+      c.dataset.depth = (i % 3 + 1) / 3;
+    });
+
+    /* gentle parallax; transform-only so it never triggers layout */
+    var tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+    window.addEventListener("pointermove", function(e){
+      tx = (e.clientX / window.innerWidth - .5) * 2;
+      ty = (e.clientY / window.innerHeight - .5) * 2;
+      if (!raf) raf = requestAnimationFrame(tick);
+    }, {passive:true});
+
+    function tick(){
+      cx += (tx - cx) * .06;
+      cy += (ty - cy) * .06;
+      chips.forEach(function(c){
+        var d = parseFloat(c.dataset.depth || .5);
+        var r = c.dataset.rot || 0;
+        c.style.transform =
+          "rotate(" + r + "deg) translate3d(" + (cx * -16 * d).toFixed(2) + "px," +
+          (cy * -14 * d).toFixed(2) + "px,0)";
+      });
+      raf = (Math.abs(tx - cx) > .001 || Math.abs(ty - cy) > .001)
+        ? requestAnimationFrame(tick) : null;
+    }
+  }
+
+  /* ---- scroll reveals ---- */
+  var targets = document.querySelectorAll(".rv:not(header .rv), .rv-rule");
+  if (!("IntersectionObserver" in window) || reduce) {
+    targets.forEach(function(t){ t.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        /* stagger siblings within a group for a sense of sequence */
+        var group = el.parentElement ? el.parentElement.querySelectorAll(":scope > .rv") : [];
+        var idx = Array.prototype.indexOf.call(group, el);
+        el.style.transitionDelay = (idx > 0 ? idx * 80 : 0) + "ms";
+        el.classList.add("in");
+        io.unobserve(el);
+        if (el.querySelector && el.querySelector("[data-count]")) countUp(el);
+        if (el.hasAttribute && el.hasAttribute("data-count")) countUp(el.parentElement);
+      });
+    }, {threshold:.15, rootMargin:"0px 0px -8% 0px"});
+    targets.forEach(function(t){ io.observe(t); });
+  }
+
+  /* ---- number counters ---- */
+  function countUp(scope){
+    if (!scope) return;
+    var nodes = scope.querySelectorAll ? scope.querySelectorAll("[data-count]") : [];
+    nodes.forEach(function(node){
+      if (node.dataset.done) return;
+      node.dataset.done = "1";
+      var target = parseFloat(node.dataset.count);
+      var decimals = parseInt(node.dataset.decimal || "0", 10);
+      var suffix = node.dataset.suffix || "";
+      if (reduce) {
+        node.textContent = fmt(target, decimals) + suffix;
+        return;
+      }
+      var start = performance.now(), dur = 1250;
+      function frame(now){
+        var p = Math.min(1, (now - start) / dur);
+        /* easeOutExpo: fast start, long settle - reads as precise rather than bouncy */
+        var e = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+        node.textContent = fmt(target * e, decimals) + suffix;
+        if (p < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+  function fmt(v, decimals){
+    if (decimals > 0) return (v / Math.pow(10, decimals)).toFixed(decimals);
+    return Math.round(v).toLocaleString("en-US");
+  }
+})();
+</script>
+</body>
+</html>
