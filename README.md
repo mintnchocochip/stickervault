@@ -87,20 +87,24 @@ It validates the *rule*, not the Kotlin — keep the two in step by hand.
 
 ## Building
 
+Needs JDK 17 and the Android SDK (platform 35, build-tools 35.0.0). Gradle comes
+from the wrapper, so there is nothing else to install.
+
 ```bash
-export JAVA_HOME="/c/Program Files/Microsoft/jdk-17.0.19.10-hotspot"
-export ANDROID_HOME="/c/Users/Shawf/AppData/Local/Android/Sdk"
 ./gradlew assembleDebug      # app/build/outputs/apk/debug/app-debug.apk
 ./gradlew assembleRelease    # minified, ~2 MB
 ```
 
-| Piece | Version |
-|---|---|
-| JDK | Microsoft 17 |
-| Android SDK | platform 35, build-tools 35.0.0 |
-| Gradle | 8.9 (wrapper) |
+If Gradle cannot find the SDK, create `local.properties` in the project root
+pointing at your own installation — it is gitignored, so every machine needs its
+own:
 
-`local.properties` points Gradle at the SDK and is gitignored.
+```properties
+sdk.dir=/path/to/Android/Sdk
+```
+
+AGP wants JDK 17 specifically; newer JDKs will fail. Set `JAVA_HOME` to a 17
+installation if your default is something else.
 
 The debug build uses applicationId `com.stickervault.debug`, so it installs
 alongside a release build rather than replacing it.
