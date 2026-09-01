@@ -123,24 +123,6 @@ installation if your default is something else.
 The debug build uses applicationId `com.stickervault.debug`, so it installs
 alongside a release build rather than replacing it.
 
-### Publishing
-
-Release builds are signed only if `keystore.properties` exists in the project
-root. **Create the key yourself** — it must never be generated or stored by
-anything but you, and it cannot be replaced once an app is published:
-
-```bash
-keytool -genkey -v -keystore upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
-```
-
-Then create `keystore.properties` (gitignored):
-
-```properties
-storeFile=../upload.jks
-storePassword=…
-keyAlias=upload
-keyPassword=…
-```
 
 Store readiness notes:
 
