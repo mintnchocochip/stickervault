@@ -115,6 +115,51 @@ Anchored isn't the same as exact. Worth a test rather than a glance.
 
 ---
 
+## Version D — the experiment (no-code / AI pair-programming angle)
+
+I've switched phones a few times over the years, and every time, the same small
+loss: my entire WhatsApp sticker collection, gone. Four years of in-jokes and
+reaction images that only ever lived inside an app that doesn't survive a new
+handset.
+
+This time I wanted to fix it — but I set myself a rule: I wouldn't write a single
+line of the code. My job was to be the architect and the product owner. Claude
+Code would be the engineer.
+
+That constraint turned out to be the interesting part. All the leverage moved to
+the decisions:
+
+- **WhatsApp shouldn't *be* the collection.** The durable artifact is a plain zip
+  of ordinary `.webp` files that opens on any computer. The app is a replaceable
+  view onto it.
+- **Name every file by its own SHA-256.** One decision, three properties:
+  deduplication is free, imports are idempotent, and integrity verifies itself —
+  if the bytes don't hash to the filename, the file is corrupt.
+- **Recover pack names from the files, not a database.** Every WhatsApp sticker
+  carries an EXIF chunk naming its origin pack. 94.9% of mine did — enough to
+  rebuild 433 packs without root.
+- **Declare no INTERNET permission.** Then the OS itself guarantees the
+  collection can't leave the device. The privacy claim isn't a promise; it's
+  enforced.
+- **Treat the imported archive as hostile.** It crossed a cloud drive and another
+  device; nothing proves this app made it.
+
+From idea to running on real data — 11,203 stickers, 1.4 GB — took about 7–8
+hours in one sitting. Claude wrote the Kotlin and Compose; I read a lot of
+WhatsApp's sticker contract and said yes, no, and "what happens if the file lies
+about its size."
+
+The bottleneck was never typing speed. It was knowing exactly what I wanted, and
+describing the constraints precisely enough to hand off.
+
+Nice little experiment. The stickers are back.
+
+🔗 [LINK]
+
+#AI #ClaudeCode #Android #Kotlin #BuildInPublic
+
+---
+
 ## Notes on posting
 
 - The strongest hook is the four-phones detail, because it's specific and
