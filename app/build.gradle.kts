@@ -86,6 +86,9 @@ android {
 
     buildFeatures {
         compose = true
+        // BuildConfig.DEBUG gates the on-device diagnostics tool (hazard-triangle
+        // action) so it never appears in a release build.
+        buildConfig = true
     }
 
     packaging {

@@ -69,7 +69,8 @@ a cloud drive and another device, and nothing proves this app produced it.
 | Zip bombs | Per-entry, total-byte and entry-count ceilings, plus a free-space check before writing |
 | Forged size metadata | `ZipEntry.size` is never trusted; actual bytes read are counted and capped |
 | Corrupted or tampered content | Files are content-addressed, so bytes that do not hash to their own filename are rejected — the name *is* the checksum |
-| Type confusion | Every entry must parse as a real WebP before being written |
+| Type confusion | Every entry must pass strict structural WebP validation (`WebpValidator`) before being written — a full RIFF chunk walk, not a header sniff |
+| Malformed WebP reaching WhatsApp's decoder | The bytes served to WhatsApp are validated a second time at pack-build, against the file on disk, and put through the platform decoder; anything that fails is re-encoded (static) or dropped (animated). The `ContentProvider` also rejects any asset without a RIFF/WEBP (or PNG) signature |
 | Hostile metadata | Pack names and emoji come from EXIF in the files; length-capped, and never used to build a path |
 
 The app declares **no storage permission** (the folder picker is a user grant)
@@ -82,6 +83,19 @@ python tools/verify_import_guard.py
 
 Throws 34 traversal, encoding and type-confusion payloads at the entry-name rule.
 It validates the *rule*, not the Kotlin — keep the two in step by hand.
+
+```bash
+python tools/verify_webp_validator.py
+```
+
+Throws crafted, truncated, size-lying and flag-inconsistent WebP blobs at
+`WebpValidator` — the gate that keeps anything but a structurally sound WebP out
+of a sticker pack and away from WhatsApp's decoder. Ports the Kotlin walk and
+also checks real Pillow-generated files pass. Requires Pillow.
+
+In a debug build, the hazard-triangle action on the Restore screen re-runs the
+same validation over every sticker currently served, asks WhatsApp whether it
+actually accepted each pack, and pre-fills a GitHub issue with the result.
 
 ---
 

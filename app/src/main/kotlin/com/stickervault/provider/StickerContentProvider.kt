@@ -8,6 +8,8 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import java.io.File
+import java.io.FileInputStream
 
 /**
  * Serves sticker packs to WhatsApp.
@@ -126,8 +128,40 @@ class StickerContentProvider : ContentProvider() {
         val fileName = segments[2]
 
         val file = PackStore.resolveAsset(ctx, identifier, fileName) ?: return null
+        // Last-ditch content check before a byte reaches WhatsApp: a .webp asset
+        // must open with a RIFF/WEBP header, a .png tray icon with the PNG
+        // signature. Everything here is written by PackBuilder, which validates
+        // far more thoroughly - this guards only against on-disk corruption and
+        // against a future code path that forgets to.
+        if (!hasExpectedMagic(file, fileName)) return null
         val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
         return AssetFileDescriptor(pfd, 0L, file.length())
+    }
+
+    private fun hasExpectedMagic(file: File, fileName: String): Boolean {
+        val head = ByteArray(12)
+        val read = runCatching {
+            FileInputStream(file).use { stream ->
+                var n = 0
+                while (n < head.size) {
+                    val r = stream.read(head, n, head.size - n)
+                    if (r < 0) break
+                    n += r
+                }
+                n
+            }
+        }.getOrDefault(0)
+        if (read < 12) return false
+
+        return if (fileName.endsWith(".png", ignoreCase = true)) {
+            head[0] == 0x89.toByte() && head[1] == 'P'.code.toByte() &&
+                head[2] == 'N'.code.toByte() && head[3] == 'G'.code.toByte()
+        } else {
+            head[0] == 'R'.code.toByte() && head[1] == 'I'.code.toByte() &&
+                head[2] == 'F'.code.toByte() && head[3] == 'F'.code.toByte() &&
+                head[8] == 'W'.code.toByte() && head[9] == 'E'.code.toByte() &&
+                head[10] == 'B'.code.toByte() && head[11] == 'P'.code.toByte()
+        }
     }
 
     override fun getType(uri: Uri): String? = when (matcher.match(uri)) {

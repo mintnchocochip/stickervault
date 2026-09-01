@@ -180,13 +180,58 @@ object PackBuilder {
                 WhatsAppLimits.MAX_STATIC_BYTES
             }
 
-        if (compliant) {
-            return runCatching { source.copyTo(target, overwrite = true) }.isSuccess
-        }
-        // Re-encoding an animated WebP would flatten it to a single frame.
+        if (compliant && copyIfWellFormed(entry, source, target)) return true
+
+        // Re-encoding an animated WebP would flatten it to a single frame, and
+        // Android ships no animated-WebP encoder - a malformed animated sticker
+        // cannot be salvaged, so refuse it rather than serve it broken.
         if (entry.animated) return false
 
         return runCatching { resizeStatic(source, target) }.getOrDefault(false)
+    }
+
+    /**
+     * Copies a sticker verbatim only if its bytes are a structurally sound WebP
+     * of the expected shape *and* the platform decoder accepts them.
+     *
+     * The vault archive is untrusted input, and "it is 512x512 and small
+     * enough" - all the previous compliant path checked, from metadata recorded
+     * at import - is not a guarantee the file is real WebP. The bytes handed to
+     * WhatsApp's decoder must be validated here, against the file on disk, right
+     * before it is served. A file that fails falls through to the re-encode
+     * path (static) or is dropped (animated).
+     */
+    private fun copyIfWellFormed(entry: LibraryEntry, source: File, target: File): Boolean {
+        val bytes = runCatching { source.readBytes() }.getOrNull() ?: return false
+        if (bytes.size != entry.bytes) return false
+
+        val valid = WebpValidator.validate(bytes) as? WebpValidator.Result.Valid ?: return false
+        if (valid.width != WhatsAppLimits.STICKER_DIMENSION ||
+            valid.height != WhatsAppLimits.STICKER_DIMENSION ||
+            valid.animated != entry.animated
+        ) {
+            return false
+        }
+        val budget = if (entry.animated) {
+            WhatsAppLimits.MAX_ANIMATED_BYTES
+        } else {
+            WhatsAppLimits.MAX_STATIC_BYTES
+        }
+        if (bytes.size > budget) return false
+
+        // Exercise the real WebP decoder. For an animation this decodes the
+        // first frame; combined with the structural ANIM/ANMF checks in
+        // WebpValidator that is as far as validation can go without an animated
+        // decoder on the device.
+        val decoded = runCatching {
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        }.getOrNull() ?: return false
+        val okDims = decoded.width == WhatsAppLimits.STICKER_DIMENSION &&
+            decoded.height == WhatsAppLimits.STICKER_DIMENSION
+        decoded.recycle()
+        if (!okDims) return false
+
+        return runCatching { source.copyTo(target, overwrite = true) }.isSuccess
     }
 
     /**
@@ -221,7 +266,17 @@ object PackBuilder {
             Bitmap.CompressFormat.WEBP_LOSSY,
         )
         canvasBitmap.recycle()
-        return ok
+        if (!ok) return false
+
+        // The encoder should always produce a clean file, but these bytes are
+        // about to go to WhatsApp - verify rather than assume.
+        val out = runCatching { target.readBytes() }.getOrNull()
+        val check = out?.let { WebpValidator.validate(it) } as? WebpValidator.Result.Valid
+        if (check == null || check.width != side || check.height != side || check.animated) {
+            target.delete()
+            return false
+        }
+        return true
     }
 
     private fun writeTray(source: File, target: File): Boolean {

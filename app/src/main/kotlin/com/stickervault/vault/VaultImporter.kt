@@ -158,9 +158,15 @@ class VaultImporter(private val context: Context) {
             return Outcome.Rejected("content does not match its hash: ${sha.take(12)}…")
         }
 
-        // Must actually be a WebP, not something renamed to look like one.
-        val info = WebpProbe.parse(bytes)
-            ?: return Outcome.Rejected("not a valid WebP: ${sha.take(12)}…")
+        // Must be a structurally sound WebP, not something renamed to look like
+        // one and not a crafted blob with plausible header bytes. This is the
+        // gate that keeps malformed content out of the library and therefore out
+        // of anything later handed to WhatsApp.
+        val info = when (val v = WebpValidator.validate(bytes)) {
+            is WebpValidator.Result.Invalid ->
+                return Outcome.Rejected("malformed WebP (${v.reason}): ${sha.take(12)}…")
+            is WebpValidator.Result.Valid -> v
+        }
 
         if (index.containsKey(sha) && File(target, "$sha.webp").isFile) {
             return Outcome.Present
