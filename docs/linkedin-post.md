@@ -47,7 +47,7 @@ send your collection anywhere.
 Built with Claude Code. Kotlin, Jetpack Compose, and a lot of reading of
 WhatsApp's sticker contract.
 
-🔗 [LINK]
+🔗 https://mintnchocochip.github.io/stickervault
 
 #Android #Kotlin #OpenSource #MobileDevelopment
 
@@ -71,7 +71,7 @@ made them.
 
 2.2 MB. No network permission. Open source.
 
-🔗 [LINK]
+🔗 https://mintnchocochip.github.io/stickervault
 
 #Android #Kotlin #OpenSource
 
@@ -109,7 +109,7 @@ design decision, three properties.
 newline, because `$` matches before a final newline in most regex flavours.
 Anchored isn't the same as exact. Worth a test rather than a glance.
 
-🔗 [LINK]
+🔗 https://mintnchocochip.github.io/stickervault
 
 #Android #Kotlin #MobileDevelopment #Security
 
@@ -154,7 +154,7 @@ describing the constraints precisely enough to hand off.
 
 Nice little experiment. The stickers are back.
 
-🔗 [LINK]
+🔗 https://mintnchocochip.github.io/stickervault
 
 #AI #ClaudeCode #Android #Kotlin #BuildInPublic
 
@@ -166,5 +166,6 @@ Nice little experiment. The stickers are back.
   a lot of people have quietly had the same experience.
 - Including the limitation reads as confidence, not weakness. It is also the
   thing most likely to prompt replies from people who know the platform.
-- If you post the GitHub link while the repository is private, nobody can open
-  it. Either make it public first or link the landing page instead.
+- The link points at the GitHub Pages site
+  (<https://mintnchocochip.github.io/stickervault>); swap it for the repo or a
+  release if that reads better for the audience.
