@@ -9,6 +9,7 @@ captures/
 .cxx
 *.apk
 tools/*.webp
+tools/__pycache__/
 keystore.properties
 *.jks
 *.keystore
