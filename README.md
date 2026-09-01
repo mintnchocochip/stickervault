@@ -231,8 +231,6 @@ prevents it from transmitting anything — the claim is enforced by Android, not
 our good intentions. Full policy: [docs/privacy.html](docs/privacy.html), published at
 <https://mintnchocochip.github.io/stickervault/privacy.html>.
 
-Before submitting to Play, replace the contact-email placeholder in that file.
-
 ## License
 
 GNU General Public License v3.0 — see [LICENSE](LICENSE).
