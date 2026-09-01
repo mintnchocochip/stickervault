@@ -117,7 +117,7 @@ fun ExportScreen(vm: ExportViewModel = viewModel()) {
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    "You can leave the app — this keeps running and you'll get " +
+                    "You can leave the app. This keeps running and you'll get " +
                         "a notification when it's done.",
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center,
@@ -240,7 +240,7 @@ private fun ReadyToExport(
         if (state.files.isEmpty()) {
             Spacer(Modifier.height(20.dp))
             Text(
-                "No .webp files here. This is probably the wrong folder — make " +
+                "No .webp files here. This is probably the wrong folder. Make " +
                     "sure you picked \"WhatsApp Stickers\", not its parent.",
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -333,7 +333,7 @@ private fun DoneScreen(
                 Text("Getting it off the phone", style = MaterialTheme.typography.labelLarge)
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    "The share sheet often fails on large archives — Drive in " +
+                    "The share sheet often fails on large archives; Drive in " +
                         "particular tends to give up silently. If that happens, " +
                         "open the Drive app and upload from Downloads directly, or " +
                         "use Quick Share to a computer. The file is already saved; " +

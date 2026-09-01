@@ -1,11 +1,11 @@
-# LinkedIn post — drafts
+# LinkedIn post drafts
 
 Three versions at different lengths. Pick one, edit it into your own voice, and
 delete the rest. Swap the link for whichever is public at the time.
 
 ---
 
-## Version A — the story (recommended)
+## Version A: the story (recommended)
 
 I've changed phones four times in four years. Every single time, I lost my
 WhatsApp sticker collection and rebuilt it from scratch.
@@ -20,13 +20,13 @@ put on Drive, and restores what you want onto the next phone.
 A few things I learned building it that I didn't expect:
 
 **The metadata was hiding in plain sight.** I assumed pack names were locked in
-WhatsApp's database, which needs root. They're not — every sticker carries an
+WhatsApp's database, which needs root. They're not. Every sticker carries an
 EXIF chunk naming the pack it came from. 94.9% of my library had it, which was
 enough to rebuild 433 packs without touching anything privileged.
 
 **My library was 11,203 stickers.** I had guessed a few hundred. Content-hash
 deduplication found almost no duplicates, because WhatsApp already dedupes on
-disk — so that number is real.
+disk, so that number is real.
 
 **The most useful architectural decision was the dullest one.** The archive is
 just WebP files named by their own SHA-256, plus one JSON file. That makes
@@ -41,7 +41,7 @@ providing app, so uninstalling removes them. That's true of every sticker app on
 Android and has been an open request since 2018. The zip is the durable thing;
 the app is a replaceable adapter.
 
-2.2 MB, no network permission — the OS itself makes it impossible for the app to
+2.2 MB, no network permission. The OS itself makes it impossible for the app to
 send your collection anywhere.
 
 Built with Claude Code. Kotlin, Jetpack Compose, and a lot of reading of
@@ -53,7 +53,7 @@ WhatsApp's sticker contract.
 
 ---
 
-## Version B — short
+## Version B: short
 
 Changed phones four times in four years. Lost my WhatsApp stickers four times.
 
@@ -61,7 +61,7 @@ So I built StickerVault: it archives the whole collection into a plain zip, and
 restores what you pick onto the next phone.
 
 The part I enjoyed most was discovering that pack names aren't locked away in
-WhatsApp's database after all — every sticker carries its origin in an embedded
+WhatsApp's database after all. Every sticker carries its origin in an embedded
 EXIF chunk. 94.9% of my 11,203 stickers had it, enough to rebuild 433 packs
 without root.
 
@@ -77,13 +77,13 @@ made them.
 
 ---
 
-## Version C — technical
+## Version C: technical
 
 Some notes from building a WhatsApp sticker backup tool, in case they save
 someone else the afternoon.
 
 **Android quietly closed the door on /Android/ via SAF.** Grants for anything
-under it fail — and when they do, `OpenDocumentTree` returns null rather than an
+under it fail, and when they do, `OpenDocumentTree` returns null rather than an
 error. A null result and a refused grant look identical, which means "nothing
 happens when I tap allow" is a state you have to handle explicitly.
 
@@ -92,7 +92,7 @@ action-only implicit intent to another app resolves to nothing unless you declar
 `<queries>` AND set the target package. It fails silently, exactly as though the
 other app weren't installed.
 
-**WhatsApp tells you why it rejected a sticker pack** — but only through a
+**WhatsApp tells you why it rejected a sticker pack,** but only through a
 `validation_error` extra on the activity result. Use `startActivity` instead of
 expecting a result and you throw that away, turning a specific diagnosis into
 silence.
@@ -102,7 +102,7 @@ carries an EXIF chunk with its pack name, publisher and emoji tags. Pack groupin
 survives export without root.
 
 **Content-addressed storage is underrated.** Naming files by their own SHA-256
-made deduplication free, imports idempotent, and integrity self-verifying — one
+made deduplication free, imports idempotent, and integrity self-verifying: one
 design decision, three properties.
 
 **And a security note:** my first archive entry-name filter accepted a trailing
@@ -115,14 +115,14 @@ Anchored isn't the same as exact. Worth a test rather than a glance.
 
 ---
 
-## Version D — the experiment (no-code / AI pair-programming angle)
+## Version D: the experiment (no-code / AI pair-programming angle)
 
 I've switched phones a few times over the years, and every time, the same small
 loss: my entire WhatsApp sticker collection, gone. Four years of in-jokes and
 reaction images that only ever lived inside an app that doesn't survive a new
 handset.
 
-This time I wanted to fix it — but I set myself a rule: I wouldn't write a single
+This time I wanted to fix it, but I set myself a rule: I wouldn't write a single
 line of the code. My job was to be the architect and the product owner. Claude
 Code would be the engineer.
 
@@ -133,10 +133,10 @@ the decisions:
   of ordinary `.webp` files that opens on any computer. The app is a replaceable
   view onto it.
 - **Name every file by its own SHA-256.** One decision, three properties:
-  deduplication is free, imports are idempotent, and integrity verifies itself —
-  if the bytes don't hash to the filename, the file is corrupt.
+  deduplication is free, imports are idempotent, and integrity verifies itself.
+  If the bytes don't hash to the filename, the file is corrupt.
 - **Recover pack names from the files, not a database.** Every WhatsApp sticker
-  carries an EXIF chunk naming its origin pack. 94.9% of mine did — enough to
+  carries an EXIF chunk naming its origin pack. 94.9% of mine did, enough to
   rebuild 433 packs without root.
 - **Declare no INTERNET permission.** Then the OS itself guarantees the
   collection can't leave the device. The privacy claim isn't a promise; it's
@@ -144,7 +144,7 @@ the decisions:
 - **Treat the imported archive as hostile.** It crossed a cloud drive and another
   device; nothing proves this app made it.
 
-From idea to running on real data — 11,203 stickers, 1.4 GB — took about 7–8
+From idea to running on real data (11,203 stickers, 1.4 GB) took about 7-8
 hours in one sitting. Claude wrote the Kotlin and Compose; I read a lot of
 WhatsApp's sticker contract and said yes, no, and "what happens if the file lies
 about its size."

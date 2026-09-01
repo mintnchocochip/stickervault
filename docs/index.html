@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>StickerVault — your stickers outlive your phone</title>
+<title>StickerVault: your stickers outlive your phone</title>
 <meta name="description" content="Back up your WhatsApp sticker collection to a portable zip and restore it on a new phone. Open source, Android, 2.2 MB, no network permission.">
 <meta property="og:title" content="StickerVault">
 <meta property="og:description" content="Your WhatsApp stickers outlive your phone.">
@@ -236,7 +236,7 @@ footer a:hover{color:var(--clay)}
       <div class="step">
         <div class="num">01</div>
         <h3>Archive</h3>
-        <p>Grant the sticker folder once. Everything is de-duplicated by content hash and streamed into a single zip in Downloads — as a foreground service, so it survives leaving the app.</p>
+        <p>Grant the sticker folder once. Everything is de-duplicated by content hash and streamed into a single zip in Downloads, as a foreground service, so it survives leaving the app.</p>
       </div>
       <div class="step">
         <div class="num">02</div>
@@ -259,7 +259,7 @@ footer a:hover{color:var(--clay)}
     <div class="grid">
       <div class="card rv">
         <h3>Pack names survive without root</h3>
-        <p>Every WhatsApp sticker carries an EXIF chunk naming the pack it came from. 94.9% of a real library had it — enough to rebuild 433 packs, plus 783 self-made stickers, with the database WhatsApp keeps locked away never touched.</p>
+        <p>Every WhatsApp sticker carries an EXIF chunk naming the pack it came from. 94.9% of a real library had it, enough to rebuild 433 packs, plus 783 self-made stickers, with the database WhatsApp keeps locked away never touched.</p>
       </div>
       <div class="card rv">
         <h3>The filename is the checksum</h3>
@@ -267,7 +267,7 @@ footer a:hover{color:var(--clay)}
       </div>
       <div class="card rv">
         <h3>It physically cannot phone home</h3>
-        <p>No <code>INTERNET</code> permission is declared, so the OS blocks any network call regardless of what the code does. No storage permission either — folder access is a user grant, not a capability.</p>
+        <p>No <code>INTERNET</code> permission is declared, so the OS blocks any network call regardless of what the code does. No storage permission either; folder access is a user grant, not a capability.</p>
       </div>
       <div class="card rv">
         <h3>Archives are treated as hostile</h3>
@@ -288,7 +288,7 @@ footer a:hover{color:var(--clay)}
       </div>
       <div class="limit rv">
         <h3>WhatsApp caps packs per app</h3>
-        <p>The documented limit is ten packs, around 300 stickers. Whether it is actually enforced at runtime is still unverified — the app asks WhatsApp directly and shows you which packs it kept.</p>
+        <p>The documented limit is ten packs, around 300 stickers. Whether it is actually enforced at runtime is still unverified. The app asks WhatsApp directly and shows you which packs it kept.</p>
       </div>
       <div class="limit rv">
         <h3>Large animated stickers are archive-only</h3>
